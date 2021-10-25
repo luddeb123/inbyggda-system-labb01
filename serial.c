@@ -12,6 +12,17 @@ void uart_init(void)
     UCSR0B |= _BV(TXEN0); // Enable transmitter:
     UCSR0B |= _BV(RXEN0); // Enable Receiver:
 
+    // 8 bits of data data
+    UCSR0C |= _BV(UCSZ01);
+    UCSR0C |= _BV(UCSZ00);
+
+    // No Parity bit
+    UCSR0C &= ~_BV(UPM00);
+    UCSR0C &= ~_BV(UPM01);
+
+    // 1 Stop bit
+    UCSR0C &= ~_BV(USBS0);
+
     // Set baudrate
     uint16_t ubrrn = FOSC / (16 * BAUD) - 1;
     UBRR0 = ubrrn;
@@ -19,6 +30,7 @@ void uart_init(void)
 
 void uart_putchar(char chr)
 {
+    // Wait untill the data is set
     loop_until_bit_is_set(UCSR0A, UDRE0);
     UDR0 = chr;
     if (chr == '\n')
@@ -36,4 +48,16 @@ void uart_putstr(const char *str)
         uart_putchar(chr);
         ++str;
     }
+}
+
+char uart_getchar(void){
+    // Wait untill the data is set
+    loop_until_bit_is_set(UCSR0A, RXC0);
+    // Take data from memory and return it.
+    return UDR0;
+}
+
+void uart_echo(void) {
+    char chr = uart_getchar();
+    uart_putchar(chr);
 }

@@ -23,6 +23,7 @@ int main(void)
 
         _delay_ms(500); // delay 500ms
         */
-        uart_putstr(name);
+        // uart_putstr(name);
+        uart_echo();
     }
 }
