@@ -1,7 +1,7 @@
 # Inbyggda-system
 ATmega328p with TRITECH board
 
-screen /dev/ttyS3 38200
+screen /dev/ttyS3 38400
 
 make
 make clean
