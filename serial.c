@@ -1,5 +1,6 @@
 #include <avr/io.h>
 #include <util/delay.h>
+#include <stdbool.h>
 
 #include "serial.h"
 
@@ -28,22 +29,29 @@ void uart_init(void)
     UBRR0 = ubrrn;
 }
 
-void uart_putchar(char chr)
-{
-    // Wait untill the data is set
-    loop_until_bit_is_set(UCSR0A, UDRE0);
-    UDR0 = chr;
-    if (chr == '\n')
-    {
-        uart_putchar('\r');
+bool serial_available(){
+    if(!(UCSR0A & (1 << UDRE0))){
+        return false;
+    }
+    return true;
+}
+
+void uart_putchar(char chr){
+    if(chr == '\r' || chr == '\n'){
+        while (!serial_available());
+        UDR0 = '\r';
+        while (!serial_available());
+        UDR0 = '\n';
+    }
+    else {
+        while (!serial_available());
+        UDR0 = chr;
     }
 }
 
-void uart_putstr(const char *str)
-{
+void uart_putstr(char *str){
     char chr = *str;
-    while (chr != '\0')
-    { // While char is not null 
+    while (chr != '\0'){
         chr = *str;
         uart_putchar(chr);
         ++str;
@@ -60,4 +68,20 @@ char uart_getchar(void){
 void uart_echo(void) {
     char chr = uart_getchar();
     uart_putchar(chr);
+}
+
+void uart_get_command(char *command){
+    char c;
+    int i = 0;
+    c = uart_getchar();
+    uart_putchar(c);
+    while((c != '\r') && (c !='\n') && (i <=(MAX_COMMAND_SIZE-3))){
+        command[i] = c;
+        i++;
+        c = uart_getchar();
+        uart_putchar(c);
+    }
+    command[i] = '\r';
+    command[i+1] = '\n';
+    command[i+2] = '\0';
 }
