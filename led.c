@@ -16,6 +16,7 @@ void led_init(){
     PORTB |= (1 << BLUE);
 }
 
+// changes the values of the "led-pin-bits" depending on what value the "command-string" is. 
 void change_led_state(char *command){
     if (strcmp(command, "off\r\n")==0){
         PORTB |= (1 << RED);

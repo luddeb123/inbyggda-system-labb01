@@ -29,13 +29,15 @@ void uart_init(void)
     UBRR0 = ubrrn;
 }
 
-bool serial_available(){
+// checks if serail is abailable
+bool serial_available(){ 
     if(!(UCSR0A & (1 << UDRE0))){
         return false;
     }
     return true;
 }
 
+//send data to serial interface
 void uart_putchar(char chr){
     if(chr == '\r' || chr == '\n'){
         while (!serial_available());
@@ -49,6 +51,7 @@ void uart_putchar(char chr){
     }
 }
 
+// Sends string to uart
 void uart_putstr(char *str){
     char chr = *str;
     while (chr != '\0'){
@@ -65,11 +68,13 @@ char uart_getchar(void){
     return UDR0;
 }
 
+// just echos all the inputs back.
 void uart_echo(void) {
     char chr = uart_getchar();
     uart_putchar(chr);
 }
 
+// takes the serial input and adds it to a string if '\r' or '\n' is found comand is done and it adds those linebreakers in the string.
 void uart_get_command(char *command){
     char c;
     int i = 0;
